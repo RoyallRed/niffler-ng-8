@@ -12,12 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(BrowserExtension.class)
-public class SpendingTest {
-
-  private static final Config CFG = Config.getInstance();
+public class SpendingTest extends  BaseTest{
 
   @Spend(
-      username = "duck",
+      username = "user1",
       category = "Обучение",
       description = "Обучение Niffler 2.0",
       amount = 89000.00,
@@ -28,7 +26,7 @@ public class SpendingTest {
     final String newDescription = "Обучение Niffler NG";
 
     Selenide.open(CFG.frontUrl(), LoginPage.class)
-        .doLogin("duck", "12345")
+        .doLogin("user1", "user1")
         .editSpending(spend.description())
         .editDescription(newDescription);
 
