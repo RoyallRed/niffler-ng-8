@@ -1,10 +1,14 @@
 package guru.qa.niffler.page;
 
+import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
+import guru.qa.niffler.config.Config;
+import org.openqa.selenium.devtools.v130.page.model.PermissionsPolicyBlockLocator;
 
 import static com.codeborne.selenide.Selenide.$;
 
 public class LoginPage {
+
 
   private final SelenideElement usernameInput = $("input[name='username']");
   private final SelenideElement passwordInput = $("input[name='password']");
@@ -16,4 +20,5 @@ public class LoginPage {
     submitBtn.click();
     return new MainPage();
   }
+
 }
