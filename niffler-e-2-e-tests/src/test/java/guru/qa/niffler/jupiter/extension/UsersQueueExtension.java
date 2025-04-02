@@ -69,8 +69,8 @@ public class UsersQueueExtension implements
                         user = switch (ut.value()) {
                             case EMPTY -> Optional.ofNullable(EMPTY_USERS.poll());
                             case WITH_FRIEND -> Optional.ofNullable(WITH_FRIEND_USERS.poll());
-                            case WITH_OUTCOME_REQUEST -> Optional.ofNullable(WITH_INCOME_REQUEST_USERS.poll());
-                            case WITH_INCOME_REQUEST -> Optional.ofNullable(WITH_OUTCOME_REQUEST_USERS.poll());
+                            case WITH_INCOME_REQUEST -> Optional.ofNullable(WITH_INCOME_REQUEST_USERS.poll());
+                            case WITH_OUTCOME_REQUEST -> Optional.ofNullable(WITH_OUTCOME_REQUEST_USERS.poll());
                         };
                     }
                     Allure.getLifecycle().updateTestCase(testCase ->
@@ -118,13 +118,7 @@ public class UsersQueueExtension implements
 
     @Override
     public StaticUser resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        Map<UserType, StaticUser> map = extensionContext.getStore(NAMESPACE).get(extensionContext.getUniqueId(), Map.class);
-        UserType userType = Arrays.stream(parameterContext.getParameter().getAnnotations())
-                .filter(a -> a instanceof UserType)
-                .map(a -> (UserType) a)
-                .findFirst()
-                .orElseThrow(() -> new ParameterResolutionException("No UserType annotation found"));
-
-        return map.get(userType);
+        return (StaticUser) extensionContext.getStore(NAMESPACE).get(extensionContext.getUniqueId(), Map.class)
+                .get(AnnotationSupport.findAnnotation(parameterContext.getParameter(), UserType.class).get());
     }
 }
