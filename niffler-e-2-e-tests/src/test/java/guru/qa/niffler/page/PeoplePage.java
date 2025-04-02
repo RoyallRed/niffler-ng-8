@@ -8,8 +8,7 @@ import lombok.Getter;
 import java.time.Duration;
 
 import static com.codeborne.selenide.CollectionCondition.empty;
-import static com.codeborne.selenide.Condition.text;
-import static com.codeborne.selenide.Condition.visible;
+import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.$$;
 import static com.codeborne.selenide.Selenide.$x;
 import static java.lang.String.*;
@@ -65,8 +64,8 @@ public class PeoplePage {
     public void assertIncomeFiendRequestIsShown(String personName, Lists listName) {
         var row = $$(String.format(baseListLocator, listName.getDisplayName())).find(text(personName));
         row.shouldBe(visible, Duration.ofSeconds(5));
-        row.find(xpath(format(baseButtonLocator, "Accept"))).shouldBe(visible);
-        row.find(xpath(format(baseButtonLocator, "Decline"))).shouldBe(visible);
+        row.find(xpath(format(baseButtonLocator, "Accept"))).shouldBe(visible,enabled);
+        row.find(xpath(format(baseButtonLocator, "Decline"))).shouldBe(visible,enabled);
     }
 
     public void assertOutcomeFiendRequestIsShown(String personName, Lists listName) {
@@ -80,24 +79,4 @@ public class PeoplePage {
         friendRows.find(text(friendName)).shouldBe(visible);
 
     }
-
-/*    public void assertIncomeFiendRequestIsShown(String friendName) {
-        var friendRow = friendRequestRows.find(text(friendName));
-        friendRow.find(xpath(format(baseButtonLocator, "Accept"))).shouldBe(visible);
-        friendRow.find(xpath(format(baseButtonLocator, "Decline"))).shouldBe(visible);
-
-    }*/
-
-
-    private void assertOutcomeFriendRequestIsShown(ElementsCollection friendRows, String friendName) {
-        var friendRow = friendRows.find(text(friendName));
-        friendRow.find(xpath("//span[contains(text(), 'Waiting...')]")).shouldBe(visible);
-
-// для конкретного пользователя не горит кнопка add friend  и на его месте текст Waiting...
-    }
-
-    private void assertButtonIsEnabled(String buttonName) {
-        $x(format(baseButtonLocator, buttonName)).shouldBe(Condition.enabled);
-    }
-
 }
