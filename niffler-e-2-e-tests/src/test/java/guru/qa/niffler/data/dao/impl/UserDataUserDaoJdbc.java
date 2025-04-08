@@ -10,7 +10,7 @@ import java.sql.*;
 import java.util.Optional;
 import java.util.UUID;
 
-public class UserDataUserUserDaoJdbc implements UserDataUserDao {
+public class UserDataUserDaoJdbc implements UserDataUserDao {
 
     private static final Config CFG = Config.getInstance();
     @Override
@@ -59,7 +59,7 @@ public class UserDataUserUserDaoJdbc implements UserDataUserDao {
                         UserEntity ue = new UserEntity();
                         ue.setId(rs.getObject("id", UUID.class));
                         ue.setUsername(rs.getString("username"));
-                        ue.setCurrency(rs.getObject("currency", CurrencyValues.class));
+                        ue.setCurrency(CurrencyValues.valueOf(rs.getString("currency")));
                         ue.setFirstname(rs.getString("firstname"));
                         ue.setSurname(rs.getString("surname"));
                         ue.setPhoto(rs.getBytes("username"));
@@ -89,7 +89,7 @@ public class UserDataUserUserDaoJdbc implements UserDataUserDao {
                         UserEntity ue = new UserEntity();
                         ue.setId(rs.getObject("id", UUID.class));
                         ue.setUsername(rs.getString("username"));
-                        ue.setCurrency(rs.getObject("currency", CurrencyValues.class));
+                        ue.setCurrency(CurrencyValues.valueOf(rs.getString("currency")));
                         ue.setFirstname(rs.getString("firstname"));
                         ue.setSurname(rs.getString("surname"));
                         ue.setPhoto(rs.getBytes("username"));
