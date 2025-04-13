@@ -31,7 +31,7 @@ public class Databases {
   public record XaConsumer(Consumer<Connection> function, String jdbcUrl) {
   }
 
-  public static <T> T transaction(Function<Connection, T> function, String jdbcUrl, int isolationLevel) {
+  public static <T> T transaction(int isolationLevel, Function<Connection, T> function, String jdbcUrl) {
     Connection connection = null;
     try {
       connection = connection(jdbcUrl);
@@ -57,13 +57,15 @@ public class Databases {
   //передать в параметры два function/первая создает пользователя в Auth а второй в userData
   //если что-то пошло не так - откатываются изменения в обеих базах
 
-  public static <T> T xaTransaction(XaFunction<T>... actions) {
+  public static <T> T xaTransaction(int isolationLevel, XaFunction<T>... actions) {
     UserTransaction ut = new UserTransactionImp();
     try {
       ut.begin();
       T result = null;
       for (XaFunction<T> action : actions) {
-        result = action.function.apply(connection(action.jdbcUrl));
+        Connection connection = connection(action.jdbcUrl);
+        connection.setTransactionIsolation(isolationLevel);
+        result = action.function.apply(connection);
       }
       ut.commit();
       return result;
@@ -77,12 +79,12 @@ public class Databases {
     }
   }
 
-  @Transactional(isolation = Isolation.SERIALIZABLE)
-  public static void transaction(Consumer<Connection> consumer, String jdbcUrl) {
+  public static void transaction(int isolationLevel, Consumer<Connection> consumer, String jdbcUrl) {
     Connection connection = null;
     try {
       connection = connection(jdbcUrl);
       connection.setAutoCommit(false);
+      connection.setTransactionIsolation(isolationLevel);
       consumer.accept(connection);
       connection.commit();
       connection.setAutoCommit(true);
@@ -99,12 +101,14 @@ public class Databases {
     }
   }
 
-  public static void xaTransaction(XaConsumer... actions) {
+  public static void xaTransaction(int isolationLevel, XaConsumer... actions) {
     UserTransaction ut = new UserTransactionImp();
     try {
       ut.begin();
       for (XaConsumer action : actions) {
-        action.function.accept(connection(action.jdbcUrl));
+        Connection connection = connection(action.jdbcUrl);
+        connection.setTransactionIsolation(isolationLevel);
+        action.function.accept(connection);
       }
       ut.commit();
     } catch (Exception e) {

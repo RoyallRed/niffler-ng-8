@@ -31,10 +31,11 @@ public class JdbcTest {
             1000.0,
             "spend-name-tx",
             null
-        ),
-            Connection.TRANSACTION_READ_COMMITTED
+        )
+
     );
 
     System.out.println(spend);
   }
+
 }
