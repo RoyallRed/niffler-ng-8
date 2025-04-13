@@ -7,6 +7,7 @@ import guru.qa.niffler.service.SpendDbClient;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.sql.Connection;
 import java.util.Date;
 
 @Disabled
@@ -22,7 +23,7 @@ public class JdbcTest {
             new Date(),
             new CategoryJson(
                 null,
-                "cat-name-tx-2",
+                "cat-name-tx-3",
                 "duck",
                 false
             ),
@@ -30,7 +31,8 @@ public class JdbcTest {
             1000.0,
             "spend-name-tx",
             null
-        )
+        ),
+            Connection.TRANSACTION_READ_COMMITTED
     );
 
     System.out.println(spend);

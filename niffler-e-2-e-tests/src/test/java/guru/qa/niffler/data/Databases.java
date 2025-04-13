@@ -5,6 +5,8 @@ import com.atomikos.jdbc.AtomikosDataSourceBean;
 import jakarta.transaction.SystemException;
 import jakarta.transaction.UserTransaction;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -29,11 +31,12 @@ public class Databases {
   public record XaConsumer(Consumer<Connection> function, String jdbcUrl) {
   }
 
-  public static <T> T transaction(Function<Connection, T> function, String jdbcUrl) {
+  public static <T> T transaction(Function<Connection, T> function, String jdbcUrl, int isolationLevel) {
     Connection connection = null;
     try {
       connection = connection(jdbcUrl);
       connection.setAutoCommit(false);
+      connection.setTransactionIsolation(isolationLevel);
       T result = function.apply(connection);
       connection.commit();
       connection.setAutoCommit(true);
@@ -50,6 +53,9 @@ public class Databases {
       throw new RuntimeException(e);
     }
   }
+
+  //передать в параметры два function/первая создает пользователя в Auth а второй в userData
+  //если что-то пошло не так - откатываются изменения в обеих базах
 
   public static <T> T xaTransaction(XaFunction<T>... actions) {
     UserTransaction ut = new UserTransactionImp();
@@ -71,7 +77,7 @@ public class Databases {
     }
   }
 
-
+  @Transactional(isolation = Isolation.SERIALIZABLE)
   public static void transaction(Consumer<Connection> consumer, String jdbcUrl) {
     Connection connection = null;
     try {

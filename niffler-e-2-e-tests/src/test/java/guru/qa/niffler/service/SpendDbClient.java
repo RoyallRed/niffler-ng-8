@@ -13,7 +13,7 @@ public class SpendDbClient {
 
   private static final Config CFG = Config.getInstance();
 
-  public SpendJson createSpend(SpendJson spend) {
+  public SpendJson createSpend(SpendJson spend, int isolationLevel ) {
     return transaction(connection -> {
           SpendEntity spendEntity = SpendEntity.fromJson(spend);
           if (spendEntity.getCategory().getId() == null) {
@@ -25,7 +25,8 @@ public class SpendDbClient {
               new SpendDaoJdbc(connection).create(spendEntity)
           );
         },
-        CFG.spendJdbcUrl()
+        CFG.spendJdbcUrl(),
+            isolationLevel
     );
   }
 }
