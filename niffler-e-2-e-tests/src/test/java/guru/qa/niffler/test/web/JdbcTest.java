@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.sql.Connection;
 import java.util.Date;
 
-@Disabled
+
 public class JdbcTest {
 
   @Test
@@ -23,14 +23,14 @@ public class JdbcTest {
             new Date(),
             new CategoryJson(
                 null,
-                "cat-name-tx-3",
+                "cat-name-tx-4",
                 "duck",
                 false
             ),
             CurrencyValues.RUB,
             1000.0,
             "spend-name-tx",
-            null
+                "duck"
         )
 
     );

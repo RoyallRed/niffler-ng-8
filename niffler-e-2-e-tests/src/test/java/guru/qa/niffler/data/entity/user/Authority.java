@@ -1,5 +1,5 @@
 package guru.qa.niffler.data.entity.user;
 
-public enum Permissions {
+public enum Authority {
     read, write, delete
 }

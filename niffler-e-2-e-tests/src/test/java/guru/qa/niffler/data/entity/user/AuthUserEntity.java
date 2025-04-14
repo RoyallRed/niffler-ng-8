@@ -1,5 +1,6 @@
 package guru.qa.niffler.data.entity.user;
 
+import guru.qa.niffler.model.AuthUserJson;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,5 +24,18 @@ public class AuthUserEntity  implements Serializable {
     private Boolean accountNonLocked;
 
     private Boolean credentialsNonExpired;
+
+    public static AuthUserEntity fromJson(AuthUserJson json){
+        AuthUserEntity authUserEntity = new AuthUserEntity();
+        authUserEntity.setId(json.id());
+        authUserEntity.setUsername(json.username());
+        authUserEntity.setPassword(json.password());
+        authUserEntity.setEnabled(json.enabled());
+        authUserEntity.setAccountNonExpired(json.accountNonExpired());
+        authUserEntity.setAccountNonLocked(json.accountNonLocked());
+        authUserEntity.setCredentialsNonExpired(json.credentialsNonExpired());
+        return authUserEntity;
+    }
+
 
 }
