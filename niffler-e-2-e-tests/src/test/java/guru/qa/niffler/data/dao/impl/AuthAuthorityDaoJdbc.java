@@ -15,14 +15,14 @@ public class AuthAuthorityDaoJdbc implements AuthAuthorityDao {
     }
 
     @Override
-    public AuthorityEntity createPermission(AuthorityEntity user) {
+    public AuthorityEntity createAuthoritiy(AuthorityEntity authorityEntity) {
         try (PreparedStatement ps = connection.prepareStatement(
-                "INSERT INTO authority (user_id, authority) " +
+                "INSERT INTO  \"authority\" (user_id, authority) " +
                         "VALUES ( ?, ?)",
                 Statement.RETURN_GENERATED_KEYS
         )) {
-            ps.setObject(1,user.getUser().getId());
-            ps.setString(2, user.getAuthority().name());
+            ps.setObject(1,authorityEntity.getUser().getId());
+            ps.setString(2, authorityEntity.getAuthority().name());
 
             ps.executeUpdate();
 
@@ -34,8 +34,8 @@ public class AuthAuthorityDaoJdbc implements AuthAuthorityDao {
                     throw new SQLException("Can`t find id in ResultSet");
                 }
             }
-            user.setId(generatedKey);
-            return user;
+            authorityEntity.setId(generatedKey);
+            return authorityEntity;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

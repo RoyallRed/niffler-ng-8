@@ -54,8 +54,6 @@ public class Databases {
     }
   }
 
-  //передать в параметры два function/первая создает пользователя в Auth а второй в userData
-  //если что-то пошло не так - откатываются изменения в обеих базах
 
   public static <T> T xaTransaction(int isolationLevel, XaFunction<T>... actions) {
     UserTransaction ut = new UserTransactionImp();
