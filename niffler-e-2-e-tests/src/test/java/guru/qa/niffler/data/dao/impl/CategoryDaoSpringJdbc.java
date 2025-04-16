@@ -3,6 +3,7 @@ package guru.qa.niffler.data.dao.impl;
 import guru.qa.niffler.data.dao.CategoryDao;
 import guru.qa.niffler.data.entity.spend.CategoryEntity;
 import guru.qa.niffler.data.entity.spend.SpendEntity;
+import guru.qa.niffler.data.mapper.AuthUserEntityRowMapper;
 import guru.qa.niffler.data.mapper.CategoryEntityRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -11,6 +12,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -52,4 +54,14 @@ public class CategoryDaoSpringJdbc implements CategoryDao {
                 id
         ));
     }
-}
+
+    @Override
+    public List<CategoryEntity> findAll() {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        return jdbcTemplate.query(
+                "SELECT * FROM category",
+               CategoryEntityRowMapper.INSTANCE
+        );
+    }
+    }
+
