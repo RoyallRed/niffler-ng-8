@@ -2,6 +2,7 @@ package guru.qa.niffler.data.dao.impl;
 
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.dao.CategoryDao;
+import guru.qa.niffler.data.entity.auth.AuthUserEntity;
 import guru.qa.niffler.data.entity.spend.CategoryEntity;
 
 import java.sql.Connection;
@@ -9,6 +10,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -69,6 +72,29 @@ public class CategoryDaoJdbc implements CategoryDao {
           return Optional.empty();
         }
       }
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public List<CategoryEntity> findAll() {
+    try (PreparedStatement ps = connection.prepareStatement(
+            "SELECT * FROM category"
+    )) {
+      ps.execute();
+      List<CategoryEntity> categoryEntities = new ArrayList<>();
+
+      try (ResultSet rs = ps.getResultSet()) {
+        while (rs.next()) {
+          CategoryEntity ce = new CategoryEntity();
+          ce.setId(rs.getObject("id", UUID.class));
+          ce.setName(rs.getString("name"));
+          ce.setUsername(rs.getString("username"));
+          ce.setArchived(rs.getBoolean("archived"));
+        }
+      }
+      return categoryEntities;
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
