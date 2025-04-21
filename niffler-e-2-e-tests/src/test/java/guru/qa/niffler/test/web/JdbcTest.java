@@ -39,7 +39,7 @@ public class JdbcTest {
   @Test
   void springJdbcTest() {
     UsersDbClient usersDbClient = new UsersDbClient();
-    UserJson user = usersDbClient.createUser(
+    UserJson user = usersDbClient.createUserByXaTxSpring(
         new UserJson(
             null,
             "valentin-4",
