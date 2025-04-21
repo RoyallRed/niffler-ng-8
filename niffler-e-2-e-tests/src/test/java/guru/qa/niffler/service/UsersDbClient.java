@@ -137,6 +137,36 @@ public class UsersDbClient {
         );
     }
 
+    public UserJson createUserByXaTxJdbc(UserJson user) {
+        return xaTransactionTemplate.execute(() -> {
+                    AuthUserEntity authUser = new AuthUserEntity();
+                    authUser.setUsername(user.username());
+                    authUser.setPassword(pe.encode("12345"));
+                    authUser.setEnabled(true);
+                    authUser.setAccountNonExpired(true);
+                    authUser.setAccountNonLocked(true);
+                    authUser.setCredentialsNonExpired(true);
+
+                    AuthUserEntity createdAuthUser = authUserDao.create(authUser);
+
+                    AuthorityEntity[] authorityEntities = Arrays.stream(Authority.values()).map(
+                            e -> {
+                                AuthorityEntity ae = new AuthorityEntity();
+                                ae.setUserId(createdAuthUser.getId());
+                                ae.setAuthority(e);
+                                return ae;
+                            }
+                    ).toArray(AuthorityEntity[]::new);
+
+                    authAuthorityDao.create(authorityEntities);
+                    return UserJson.fromEntity(
+                            udUserDaoSpring.create(UserEntity.fromJson(user)),
+                            null
+                    );
+                }
+        );
+    }
+
     public UserJson createUserChainedTx(UserJson user) {
         return chainedTxTemplate.execute((status) -> {
                     AuthUserEntity authUser = new AuthUserEntity();

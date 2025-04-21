@@ -37,12 +37,12 @@ public class JdbcTest {
   }
 
   @Test
-  void springJdbcTest() {
+  void springJdbcXaTxTest() {
     UsersDbClient usersDbClient = new UsersDbClient();
     UserJson user = usersDbClient.createUserByXaTxSpring(
         new UserJson(
             null,
-            "valentin-4",
+            "valentin-9",
             null,
             null,
             null,
@@ -53,5 +53,87 @@ public class JdbcTest {
         )
     );
     System.out.println(user);
+    // транзакция успешно откатилась
   }
+
+  @Test
+  void springJdbcNoTxTest() {
+    UsersDbClient usersDbClient = new UsersDbClient();
+    UserJson user = usersDbClient.createUserNoTxSpring(
+            new UserJson(
+                    null,
+                    "valentin-10",
+                    null,
+                    null,
+                    null,
+                    CurrencyValues.RUB,
+                    null,
+                    null,
+                    null
+            )
+    );
+    System.out.println(user);
+    // транзакция не откатилась
+  }
+
+  @Test
+  void JdbcNoTxTest() {
+    UsersDbClient usersDbClient = new UsersDbClient();
+    UserJson user = usersDbClient.createUserNoTxJdbc(
+            new UserJson(
+                    null,
+                    "valentin-14",
+                    null,
+                    null,
+                    null,
+                    CurrencyValues.RUB,
+                    null,
+                    null,
+                    null
+            )
+    );
+    System.out.println(user);
+    // транзакция не откатилась
+  }
+  @Test
+  void JdbcXaTxTest() {
+    UsersDbClient usersDbClient = new UsersDbClient();
+    UserJson user = usersDbClient.createUserByXaTxJdbc(
+            new UserJson(
+                    null,
+                    "valentin-18",
+                    null,
+                    null,
+                    null,
+                    CurrencyValues.RUB,
+                    null,
+                    null,
+                    null
+            )
+    );
+    System.out.println(user);
+    // транзакция успешно откатилась
+  }
+
+  @Test
+  void chainedTransactionTest() {
+    UsersDbClient usersDbClient = new UsersDbClient();
+    UserJson user = usersDbClient.createUserChainedTx(
+            new UserJson(
+                    null,
+                    "valentin-12",
+                    null,
+                    null,
+                    null,
+                    CurrencyValues.RUB,
+                    null,
+                    null,
+                    null
+            )
+    );
+    System.out.println(user);
+    // транзакция не откатилась. Нарушен принцип ACID. Поэтому ChainedTransactionManager стал Deprecated
+  }
+
+
 }
