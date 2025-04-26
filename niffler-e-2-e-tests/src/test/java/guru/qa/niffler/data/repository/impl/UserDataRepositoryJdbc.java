@@ -108,9 +108,7 @@ public class UserDataRepositoryJdbc implements UserDataRepository {
 
     @Override
     public void addFriend(UserEntity requester, UserEntity addressee) {
-        try (
-
-                PreparedStatement ps = holder(url).connection().prepareStatement(
+        try (PreparedStatement ps = holder(url).connection().prepareStatement(
                         "INSERT INTO \"friendship\" (requester_id, addressee_id,status) VALUES (?, ?,?)")) {
             ps.setObject(1, requester.getId());
             ps.setObject(2, addressee.getId());
