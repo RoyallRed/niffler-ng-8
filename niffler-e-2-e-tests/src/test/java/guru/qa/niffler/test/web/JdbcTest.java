@@ -54,4 +54,74 @@ public class JdbcTest {
     );
     System.out.println(user);
   }
+
+
+  @Test
+  void createFriendshipTest() {
+    UsersDbClient usersDbClient = new UsersDbClient();
+    UserJson user1 = usersDbClient.createUser(
+            new UserJson(
+                    null,
+                    "valentin-15",
+                    null,
+                    null,
+                    null,
+                    CurrencyValues.RUB,
+                    null,
+                    null,
+                    null
+            )
+    );
+
+    UserJson user2 = usersDbClient.createUser(
+            new UserJson(
+                    null,
+                    "valentin-16",
+                    null,
+                    null,
+                    null,
+                    CurrencyValues.RUB,
+                    null,
+                    null,
+                    null
+            )
+    );
+    usersDbClient.addFriendship(user1,user2);
+  }
+
+  @Test
+  void createFriendRequestTest() {
+    UsersDbClient usersDbClient = new UsersDbClient();
+    UserJson user1 = usersDbClient.createUser(
+            new UserJson(
+                    null,
+                    "valentin-17",
+                    null,
+                    null,
+                    null,
+                    CurrencyValues.RUB,
+                    null,
+                    null,
+                    null
+            )
+    );
+
+    UserJson user2 = usersDbClient.createUser(
+            new UserJson(
+                    null,
+                    "valentin-18",
+                    null,
+                    null,
+                    null,
+                    CurrencyValues.RUB,
+                    null,
+                    null,
+                    null
+            )
+    );
+    usersDbClient.addFriendRequest(user1,user2);
+  }
+
+
+
 }

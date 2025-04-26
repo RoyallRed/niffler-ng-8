@@ -9,6 +9,7 @@ import guru.qa.niffler.data.entity.auth.AuthorityEntity;
 import guru.qa.niffler.data.entity.userdata.UserEntity;
 import guru.qa.niffler.data.repository.AuthUserRepository;
 import guru.qa.niffler.data.repository.impl.AuthUserRepositoryJdbc;
+import guru.qa.niffler.data.repository.impl.UserDataRepositoryJdbc;
 import guru.qa.niffler.data.tpl.DataSources;
 import guru.qa.niffler.data.tpl.XaTransactionTemplate;
 import guru.qa.niffler.model.UserJson;
@@ -22,48 +23,63 @@ import java.util.Arrays;
 
 public class UsersDbClient {
 
-  private static final Config CFG = Config.getInstance();
-  private static final PasswordEncoder pe = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    private static final Config CFG = Config.getInstance();
+    private static final PasswordEncoder pe = PasswordEncoderFactories.createDelegatingPasswordEncoder();
 
-  private final AuthUserRepository authUserRepository = new AuthUserRepositoryJdbc();
-  private final UdUserDao udUserDao = new UdUserDaoSpringJdbc();
+    private final AuthUserRepository authUserRepository = new AuthUserRepositoryJdbc();
+    private final UserDataRepositoryJdbc userDataRepository = new UserDataRepositoryJdbc();
+    private final UdUserDao udUserDao = new UdUserDaoSpringJdbc();
 
-  private final TransactionTemplate txTemplate = new TransactionTemplate(
-      new JdbcTransactionManager(
-          DataSources.dataSource(CFG.authJdbcUrl())
-      )
-  );
-
-  private final XaTransactionTemplate xaTransactionTemplate = new XaTransactionTemplate(
-      CFG.authJdbcUrl(),
-      CFG.userdataJdbcUrl()
-  );
-
-  public UserJson createUser(UserJson user) {
-    return xaTransactionTemplate.execute(() -> {
-          AuthUserEntity authUser = new AuthUserEntity();
-          authUser.setUsername(user.username());
-          authUser.setPassword(pe.encode("12345"));
-          authUser.setEnabled(true);
-          authUser.setAccountNonExpired(true);
-          authUser.setAccountNonLocked(true);
-          authUser.setCredentialsNonExpired(true);
-      authUser.setAuthorities(
-          Arrays.stream(Authority.values()).map(
-              e -> {
-                AuthorityEntity ae = new AuthorityEntity();
-                ae.setUser(authUser);
-                ae.setAuthority(e);
-                return ae;
-              }
-          ).toList()
-      );
-      authUserRepository.create(authUser);
-          return UserJson.fromEntity(
-              udUserDao.create(UserEntity.fromJson(user)),
-              null
-          );
-        }
+    private final TransactionTemplate txTemplate = new TransactionTemplate(
+            new JdbcTransactionManager(
+                    DataSources.dataSource(CFG.authJdbcUrl())
+            )
     );
-  }
+
+    private final XaTransactionTemplate xaTransactionTemplate = new XaTransactionTemplate(
+            CFG.authJdbcUrl(),
+            CFG.userdataJdbcUrl()
+    );
+
+    public UserJson createUser(UserJson user) {
+        return xaTransactionTemplate.execute(() -> {
+                    AuthUserEntity authUser = new AuthUserEntity();
+                    authUser.setUsername(user.username());
+                    authUser.setPassword(pe.encode("12345"));
+                    authUser.setEnabled(true);
+                    authUser.setAccountNonExpired(true);
+                    authUser.setAccountNonLocked(true);
+                    authUser.setCredentialsNonExpired(true);
+                    authUser.setAuthorities(
+                            Arrays.stream(Authority.values()).map(
+                                    e -> {
+                                        AuthorityEntity ae = new AuthorityEntity();
+                                        ae.setUser(authUser);
+                                        ae.setAuthority(e);
+                                        return ae;
+                                    }
+                            ).toList()
+                    );
+                    authUserRepository.create(authUser);
+                    return UserJson.fromEntity(
+                            udUserDao.create(UserEntity.fromJson(user)),
+                            null
+                    );
+                }
+        );
+    }
+
+    public void addFriendship(UserJson user, UserJson friend) {
+        xaTransactionTemplate.execute(() -> {
+            userDataRepository.addFriend(UserEntity.fromJson(user), UserEntity.fromJson(friend));
+            return null;
+        });
+    }
+
+    public void addFriendRequest(UserJson requester, UserJson addressee) {
+        xaTransactionTemplate.execute(() -> {
+            userDataRepository.addFriendshipRequest(UserEntity.fromJson(requester), UserEntity.fromJson(addressee));
+            return null;
+        });
+    }
 }
