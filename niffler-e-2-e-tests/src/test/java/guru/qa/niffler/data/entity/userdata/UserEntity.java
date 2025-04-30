@@ -33,6 +33,13 @@ import java.util.stream.Stream;
 @Entity
 @Table(name = "\"user\"")
 public class UserEntity implements Serializable {
+  public UserEntity(UUID id) {
+    this.id = id;
+  }
+
+  public UserEntity() {
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(name = "id", nullable = false, columnDefinition = "UUID default gen_random_uuid()")

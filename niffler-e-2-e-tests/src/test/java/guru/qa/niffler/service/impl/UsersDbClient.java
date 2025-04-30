@@ -1,4 +1,4 @@
-package guru.qa.niffler.service;
+package guru.qa.niffler.service.impl;
 
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
@@ -7,12 +7,13 @@ import guru.qa.niffler.data.entity.auth.AuthorityEntity;
 import guru.qa.niffler.data.entity.userdata.UserEntity;
 import guru.qa.niffler.data.repository.AuthUserRepository;
 import guru.qa.niffler.data.repository.UserdataUserRepository;
-import guru.qa.niffler.data.repository.impl.AuthUserRepositoryHibernate;
-import guru.qa.niffler.data.repository.impl.UserdataUserRepositoryHibernate;
+import guru.qa.niffler.data.repository.impl.authUserRepository.AuthUserRepositoryHibernate;
+import guru.qa.niffler.data.repository.impl.userdataUserRepository.UserdataUserRepositoryHibernate;
 import guru.qa.niffler.data.tpl.DataSources;
 import guru.qa.niffler.data.tpl.XaTransactionTemplate;
 import guru.qa.niffler.model.CurrencyValues;
 import guru.qa.niffler.model.UserJson;
+import guru.qa.niffler.service.UsersClient;
 import org.springframework.jdbc.support.JdbcTransactionManager;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,7 +24,7 @@ import java.util.Arrays;
 import static guru.qa.niffler.utils.RandomDataUtils.randomUsername;
 
 
-public class UsersDbClient {
+public class UsersDbClient implements UsersClient {
 
   private static final Config CFG = Config.getInstance();
   private static final PasswordEncoder pe = PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -54,7 +55,24 @@ public class UsersDbClient {
     );
   }
 
-  public void addIncomeInvitation(UserJson targetUser, int count) {
+    public void addFriend(UserJson user, UserJson friend) {
+        xaTransactionTemplate.execute(() -> {
+            userdataUserRepository.addFriend(UserEntity.fromJson(user), UserEntity.fromJson(friend));
+            return null;
+        });
+    }
+
+    public UserJson createUser(UserJson user) {
+        return xaTransactionTemplate.execute(() -> {
+            AuthUserEntity authUserEntity = authUserEntity(user);
+            authUserRepository.create(authUserEntity);
+            return UserJson.fromEntity(userdataUserRepository.create(UserEntity.fromJson(user)));
+        });
+    }
+
+
+
+    public void addIncomeInvitation(UserJson targetUser, int count) {
     if (count > 0) {
       UserEntity targetEntity = userdataUserRepository.findById(
           targetUser.id()
@@ -66,7 +84,7 @@ public class UsersDbClient {
               AuthUserEntity authUser = authUserEntity(username, "12345");
               authUserRepository.create(authUser);
               UserEntity adressee = userdataUserRepository.create(userEntity(username));
-              userdataUserRepository.addIncomeInvitation(targetEntity, adressee);
+              userdataUserRepository.sendInvitation(targetEntity, adressee);
               return null;
             }
         );
@@ -86,7 +104,7 @@ public class UsersDbClient {
               AuthUserEntity authUser = authUserEntity(username, "12345");
               authUserRepository.create(authUser);
               UserEntity adressee = userdataUserRepository.create(userEntity(username));
-              userdataUserRepository.addOutcomeInvitation(targetEntity, adressee);
+              userdataUserRepository.sendInvitation(targetEntity, adressee);
               return null;
             }
         );
@@ -94,9 +112,6 @@ public class UsersDbClient {
     }
   }
 
-  void addFriend(UserJson targetUser, int count) {
-
-  }
 
   private UserEntity userEntity(String username) {
     UserEntity ue = new UserEntity();
@@ -125,4 +140,25 @@ public class UsersDbClient {
     );
     return authUser;
   }
+
+    private AuthUserEntity authUserEntity(UserJson user) {
+        AuthUserEntity authUser = new AuthUserEntity();
+        authUser.setUsername(user.username());
+        authUser.setPassword(pe.encode("12345"));
+        authUser.setEnabled(true);
+        authUser.setAccountNonExpired(true);
+        authUser.setAccountNonLocked(true);
+        authUser.setCredentialsNonExpired(true);
+        authUser.setAuthorities(
+                Arrays.stream(Authority.values()).map(
+                        e -> {
+                            AuthorityEntity ae = new AuthorityEntity();
+                            ae.setUser(authUser);
+                            ae.setAuthority(e);
+                            return ae;
+                        }
+                ).toList()
+        );
+        return authUser;
+    }
 }

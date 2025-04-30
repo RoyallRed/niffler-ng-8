@@ -13,4 +13,14 @@ public interface UdUserDao {
   Optional<UserEntity> findById(UUID id);
 
   List<UserEntity> findAll();
+
+  Optional<UserEntity> findByUsername(String username);
+
+  void sendInvitation(UserEntity requester, UserEntity addressee);
+
+  void addFriend(UserEntity requester, UserEntity addressee);
+
+
+  void remove (UserEntity user);
+
 }
