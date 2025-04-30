@@ -3,6 +3,7 @@ package guru.qa.niffler.data.dao.impl;
 import guru.qa.niffler.config.Config;
 import guru.qa.niffler.data.dao.AuthUserDao;
 import guru.qa.niffler.data.entity.auth.AuthUserEntity;
+import guru.qa.niffler.data.extractor.AuthUserEntityExtractor;
 import guru.qa.niffler.data.mapper.AuthUserEntityRowMapper;
 import guru.qa.niffler.data.tpl.DataSources;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -48,11 +49,24 @@ public class AuthUserDaoSpringJdbc implements AuthUserDao {
   public Optional<AuthUserEntity> findById(UUID id) {
     JdbcTemplate jdbcTemplate = new JdbcTemplate(DataSources.dataSource(url));
     return Optional.ofNullable(
-        jdbcTemplate.queryForObject(
-            "SELECT * FROM \"user\" WHERE id = ?",
-            AuthUserEntityRowMapper.instance,
-            id
-        )
+            jdbcTemplate.query(
+                    """
+                    SELECT a.id as authority_id,
+                           authority,
+                           user_id as id,
+                           u.username,
+                           u.password,
+                           u.enabled,
+                           u.account_non_expired,
+                           u.account_non_locked,
+                           u.credentials_non_expired
+                    FROM "user" u
+                    JOIN authority a ON u.id = a.user_id
+                    WHERE u.id = ?
+                    """,
+                    AuthUserEntityExtractor.instance,
+                    id
+            )
     );
   }
 
@@ -60,8 +74,76 @@ public class AuthUserDaoSpringJdbc implements AuthUserDao {
   public List<AuthUserEntity> findAll() {
     JdbcTemplate jdbcTemplate = new JdbcTemplate(DataSources.dataSource(url));
     return jdbcTemplate.query(
-        "SELECT * FROM \"user\"",
+            """
+                      SELECT a.id as authority_id,
+                             authority,
+                             user_id as id,
+                             u.username,
+                             u.password,
+                             u.enabled,
+                             u.account_non_expired,
+                             u.account_non_locked,
+                             u.credentials_non_expired
+                      FROM "user" u
+                      JOIN authority a ON u.id = a.user_id
+                      """,
         AuthUserEntityRowMapper.instance
     );
+  }
+
+  @Override
+  public Optional<AuthUserEntity> findByUsername(String username) {
+    JdbcTemplate jdbcTemplate = new JdbcTemplate(DataSources.dataSource(url));
+    return Optional.ofNullable(
+            jdbcTemplate.queryForObject(
+                    """
+                             SELECT a.id as authority_id,
+                                    authority,
+                                    user_id as id,
+                                    u.username,
+                                    u.password,
+                                    u.enabled,
+                                    u.account_non_expired,
+                                    u.account_non_locked,
+                                    u.credentials_non_expired
+                             FROM "user" u
+                             JOIN authority a ON u.id = a.user_id
+                             WHERE u.username = ?
+                             """,
+            AuthUserEntityRowMapper.instance)
+    );
+  }
+    @Override
+    public AuthUserEntity update(AuthUserEntity user) {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(DataSources.dataSource(CFG.authJdbcUrl()));
+
+        String sql = """
+            UPDATE "user" 
+            SET 
+            username = ?,
+            password = ?,
+            enabled = ?,
+            account_non_expired = ?,
+            account_non_locked = ?,
+            credentials_non_expired = ?
+            WHERE id = ?
+            """;
+
+        jdbcTemplate.update(sql,
+                user.getUsername(),
+                user.getPassword(),
+                user.getEnabled(),
+                user.getAccountNonExpired(),
+                user.getAccountNonLocked(),
+                user.getCredentialsNonExpired(),
+                user.getId()
+        );
+
+        return user;
+    }
+  @Override
+  public void remove(AuthUserEntity user) {
+    JdbcTemplate jdbcTemplate = new JdbcTemplate(DataSources.dataSource(CFG.authJdbcUrl()));
+    jdbcTemplate.update("DELETE FROM \"user\" WHERE id = ?", user.getId());
   }
 }

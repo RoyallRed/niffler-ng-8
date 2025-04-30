@@ -23,6 +23,15 @@ import java.util.UUID;
 @Entity
 @Table(name = "authority")
 public class AuthorityEntity implements Serializable {
+
+
+  public AuthorityEntity(UUID id) {
+    this.id = id;
+  }
+
+  public AuthorityEntity() {
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(name = "id", nullable = false, columnDefinition = "UUID default gen_random_uuid()")
